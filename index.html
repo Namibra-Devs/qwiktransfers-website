@@ -2716,7 +2716,7 @@
 
         async function fetchLiveRate() {
             try {
-                const response = await fetch('https://api.qwiktransfers.com/rates');
+                const response = await fetch('https://api.qwiktransfers.com/api/rates');
                 const data = await response.json();
                 if (data && data.rate) {
                     const rawRate = data.rate;
