@@ -1969,7 +1969,7 @@
             </div>
             <div class="mobile-rate-bar">
                 <span class="mobile-rate-dot"></span>
-                Live rate: <strong>1 CAD = 8.40 GHS</strong> &nbsp;·&nbsp; Zero fees
+                Live rate: <strong id="mobileRateText">1 CAD = 8.40 GHS</strong> &nbsp;·&nbsp; Zero fees
             </div>
         </div>
     </nav>
@@ -2032,7 +2032,7 @@
                         <div class="rate-flag">$</div>
                         <div>
                             <div class="rate-info-label">Live rate</div>
-                            <div class="rate-info-value">1 CAD = <strong>8.40 GHS</strong></div>
+                            <div class="rate-info-value">1 CAD = <strong id="heroRateText">8.40 GHS</strong></div>
                         </div>
                     </div>
 
@@ -2203,7 +2203,7 @@
                         <div class="checks">
                             <div class="check"><span class="check-mark">✓</span> Mid-market exchange rate (no markup)
                             </div>
-                            <div class="check"><span class="check-mark">✓</span> Flat $2.99 fee for transfers under $500
+                            <div class="check"><span class="check-mark">✓</span> Flat fee for transfers under $500
                             </div>
                             <div class="check"><span class="check-mark">✓</span> First transfer is on us — zero fees
                             </div>
@@ -2698,7 +2698,7 @@
         });
 
         // Live calculator
-        const RATE = 8.40;
+        let RATE = 8.40;
         const sendInput = document.getElementById('sendAmount');
         const receiveInput = document.getElementById('receiveAmount');
         const rateDisplay = document.getElementById('rateDisplay');
@@ -2713,6 +2713,29 @@
             if (totalDisplay) totalDisplay.textContent = '$' + send.toFixed(2) + ' CAD';
             if (rateDisplay) rateDisplay.textContent = '1 CAD = ' + RATE.toFixed(2) + ' GHS';
         }
+
+        async function fetchLiveRate() {
+            try {
+                const response = await fetch('http://localhost:5000/api/rates');
+                const data = await response.json();
+                if (data && data.rate) {
+                    const rawRate = data.rate;
+                    RATE = rawRate < 1 ? (1 / rawRate) : rawRate;
+
+                    if (sendInput) update();
+
+                    const mobileRateText = document.getElementById('mobileRateText');
+                    if (mobileRateText) mobileRateText.textContent = `1 CAD = ${RATE.toFixed(2)} GHS`;
+
+                    const heroRateText = document.getElementById('heroRateText');
+                    if (heroRateText) heroRateText.textContent = `${RATE.toFixed(2)} GHS`;
+                }
+            } catch (error) {
+                console.error("Failed to fetch live rate:", error);
+            }
+        }
+        fetchLiveRate();
+
         if (sendInput) {
             sendInput.addEventListener('input', update);
             update();
